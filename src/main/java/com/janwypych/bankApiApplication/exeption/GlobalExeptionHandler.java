@@ -22,7 +22,7 @@ public class GlobalExeptionHandler {
 
         return new ResponseEntity<>(
                 anf.getMessage(),
-                HttpStatus.NOT_FOUND
+                HttpStatus.UNAUTHORIZED
         );
     }
     @ExceptionHandler(WrongPasswordException.class)
@@ -31,7 +31,7 @@ public class GlobalExeptionHandler {
 
         return new ResponseEntity<>(
                 wpe.getMessage(),
-                HttpStatus.CONFLICT
+                HttpStatus.UNAUTHORIZED
         );
     }
 

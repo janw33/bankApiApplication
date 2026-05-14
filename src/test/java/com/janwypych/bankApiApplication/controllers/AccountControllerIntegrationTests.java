@@ -84,7 +84,7 @@ public class AccountControllerIntegrationTests {
         );
     }
     @Test
-    public void testThatLoginReturnsHttp404WhenAccountDoesntExist() throws Exception {
+    public void testThatLoginReturnsHttp401WhenAccountDoesntExist() throws Exception {
         LoginRequest loginRequest = TestDataUtil.createLoginRequest();
         String loginJson = objectMapper.writeValueAsString(loginRequest);
 
@@ -93,7 +93,60 @@ public class AccountControllerIntegrationTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(loginJson)
         ).andExpect(
-                MockMvcResultMatchers.status().isNotFound()
+                MockMvcResultMatchers.status().isUnauthorized()
+        );
+    }
+    @Test
+    public void testThatLoginReturnsHttp401WhenGivenPasswordIsWrong() throws Exception {
+        AccountEntity accountEntity = TestDataUtil.createAccountEntity();
+        accountService.addAccount(accountEntity);
+
+        LoginRequest loginRequest = TestDataUtil.createLoginRequest();
+        loginRequest.setPassword("???");
+        String loginJson = objectMapper.writeValueAsString(loginRequest);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.post("/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isUnauthorized()
+        );
+    }
+    @Test
+    public void testThatLoginReturnsHttp200WhenAccountExistAndPasswordIsValid() throws Exception {
+        AccountEntity accountEntity = TestDataUtil.createAccountEntity();
+        accountService.addAccount(accountEntity);
+
+        LoginRequest loginRequest = TestDataUtil.createLoginRequest();
+        String loginJson = objectMapper.writeValueAsString(loginRequest);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.post("/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isOk()
+        );
+    }
+    @Test
+    public void testThatLoginReturnsAccount() throws Exception {
+        AccountEntity accountEntity = TestDataUtil.createAccountEntity();
+        accountService.addAccount(accountEntity);
+
+        LoginRequest loginRequest = TestDataUtil.createLoginRequest();
+        String loginJson = objectMapper.writeValueAsString(loginRequest);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.post("/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginJson)
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.firstName").value("Jan")
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.lastName").value("Wypych")
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.email").value("janWypych@email.com")
         );
     }
 }
