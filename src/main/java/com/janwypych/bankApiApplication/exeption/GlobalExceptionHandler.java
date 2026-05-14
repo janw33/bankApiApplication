@@ -52,5 +52,13 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST
         );
     }
+    @ExceptionHandler(WrongTransferAmountException.class)
+    public ResponseEntity<String> handleWrongTransferAmount(
+            WrongTransferAmountException wtae) {
 
+        return new ResponseEntity<>(
+                wtae.getMessage(),
+                HttpStatus.BAD_REQUEST
+        );
+    }
 }

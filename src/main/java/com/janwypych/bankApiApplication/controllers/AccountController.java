@@ -49,4 +49,13 @@ public class AccountController {
         AccountEntity accountEntity = accountService.withdraw(id, withdrawRequest.getAmount());
         return new ResponseEntity<>(accountMapper.mapToAccountResponse(accountEntity), HttpStatus.OK);
     }
+    @PatchMapping(path = "/transfer")
+    public ResponseEntity<AccountResponse> transfer(
+            @RequestBody TransferRequest transferRequest ) {
+        AccountEntity accountEntity = accountService.transfer(
+                transferRequest.getSenderId(),
+                transferRequest.getReceiverId(),
+                transferRequest.getAmount());
+        return new ResponseEntity<>(accountMapper.mapToAccountResponse(accountEntity), HttpStatus.OK);
+    }
 }

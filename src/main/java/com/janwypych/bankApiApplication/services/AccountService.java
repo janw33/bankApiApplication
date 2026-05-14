@@ -4,6 +4,7 @@ import com.janwypych.bankApiApplication.entities.AccountEntity;
 import com.janwypych.bankApiApplication.exeption.*;
 import com.janwypych.bankApiApplication.repositories.AccountRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -64,5 +65,32 @@ public class AccountService {
 
         updatedAccount.withdraw(amount);
         return accountRepository.save(updatedAccount);
+    }
+
+    @Transactional
+    public AccountEntity transfer(Long senderId, Long receiverId, BigDecimal amount) {
+        Optional<AccountEntity> optionalSenderAccount = accountRepository.findById(senderId);
+
+        if(amount.compareTo(BigDecimal.ZERO) <= 0)
+            throw new WrongTransferAmountException("Amount is invalid");
+
+        if(optionalSenderAccount.isEmpty())
+            throw new AccountNotFoundException("Sender account not found");
+
+        Optional<AccountEntity> optionalReceiverAccount = accountRepository.findById(receiverId);
+        if(optionalReceiverAccount.isEmpty())
+            throw new AccountNotFoundException("Receiver account not found");
+
+        AccountEntity senderAccount = optionalSenderAccount.get();
+        AccountEntity receiverAccount = optionalReceiverAccount.get();
+
+        if(amount.compareTo(senderAccount.getBalance()) > 0)
+            throw new WrongTransferAmountException("Amount is invalid");
+
+        senderAccount.withdraw(amount);
+        receiverAccount.deposit(amount);
+        accountRepository.save(senderAccount);
+        accountRepository.save(receiverAccount);
+        return senderAccount;
     }
 }
