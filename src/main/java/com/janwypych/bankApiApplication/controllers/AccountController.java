@@ -2,15 +2,16 @@ package com.janwypych.bankApiApplication.controllers;
 
 import com.janwypych.bankApiApplication.Dto.AccountResponse;
 import com.janwypych.bankApiApplication.Dto.CreateAccountRequest;
+import com.janwypych.bankApiApplication.Dto.DepositRequest;
 import com.janwypych.bankApiApplication.Dto.LoginRequest;
 import com.janwypych.bankApiApplication.entities.AccountEntity;
 import com.janwypych.bankApiApplication.mappers.AccountMapper;
 import com.janwypych.bankApiApplication.services.AccountService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
 
 @RestController
 public class AccountController {
@@ -37,5 +38,13 @@ public class AccountController {
         AccountEntity accountEntity = accountMapper.mapFromLoginAccount(loginRequest);
         AccountEntity loggedAccount = accountService.login(accountEntity);
         return new ResponseEntity<>(accountMapper.mapToAccountResponse(loggedAccount), HttpStatus.OK);
+    }
+
+    @PatchMapping(path = "/deposit/{id}")
+    public ResponseEntity<AccountResponse> deposit(
+            @PathVariable("id") Long id,
+            @RequestBody DepositRequest depositRequest) {
+        AccountEntity accountEntity = accountService.deposit(id, depositRequest.getAmount());
+        return new ResponseEntity<>(accountMapper.mapToAccountResponse(accountEntity), HttpStatus.OK);
     }
 }

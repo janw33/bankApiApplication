@@ -33,4 +33,8 @@ public class AccountEntity {
 
     @Column(nullable = false)
     private BigDecimal balance;
+
+    public void deposit(BigDecimal amount) {
+        this.balance = this.balance.add(amount);
+    }
 }
