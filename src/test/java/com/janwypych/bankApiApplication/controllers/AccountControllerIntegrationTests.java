@@ -16,6 +16,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import tools.jackson.databind.ObjectMapper;
 
+import java.math.BigDecimal;
+
 @SpringBootTest
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -43,6 +45,26 @@ public class AccountControllerIntegrationTests {
                         .content(accountJson)
         ).andExpect(
                 MockMvcResultMatchers.status().isCreated()
+        );
+    }
+
+    @Test
+    public void testThatCreateAccountReturnsAccount() throws Exception {
+        CreateAccountRequest createAccountRequest = TestDataUtil.createCreateAccountRequest();
+        String accountJson = objectMapper.writeValueAsString(createAccountRequest);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.post("/accounts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(accountJson)
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.firstName").value("Jan")
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.lastName").value("Wypych")
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.email").value("janWypych@email.com")
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.balance").value(BigDecimal.ZERO)
         );
     }
 }
