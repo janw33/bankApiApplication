@@ -30,5 +30,7 @@ public class TransactionEntity {
 
     @ManyToOne
     @JoinColumn(name = "account_id")
-    private AccountEntity account;
+    private AccountEntity senderAccount;
+
+    private Long receiverId;
 }

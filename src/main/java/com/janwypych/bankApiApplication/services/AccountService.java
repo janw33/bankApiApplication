@@ -1,21 +1,26 @@
 package com.janwypych.bankApiApplication.services;
 
 import com.janwypych.bankApiApplication.entities.AccountEntity;
+import com.janwypych.bankApiApplication.entities.TransactionEntity;
+import com.janwypych.bankApiApplication.entities.enums.TransactionTypeEnum;
 import com.janwypych.bankApiApplication.exeption.*;
 import com.janwypych.bankApiApplication.repositories.AccountRepository;
+import com.janwypych.bankApiApplication.repositories.TransactionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
 public class AccountService {
     private final AccountRepository accountRepository;
+    private final TransactionRepository transactionRepository;
 
-    public AccountService(AccountRepository accountRepository) {
-        this.accountRepository = accountRepository;
-    }
+    public AccountService(AccountRepository accountRepository, TransactionRepository transactionRepository) {
+    this.accountRepository = accountRepository;
+    this.transactionRepository = transactionRepository; }
 
     public AccountEntity addAccount(AccountEntity accountEntity) {
         if(accountRepository.existsByEmail(accountEntity.getEmail()))
@@ -40,6 +45,7 @@ public class AccountService {
         return loggedAccount;
     }
 
+    @Transactional
     public AccountEntity deposit(Long id, BigDecimal amount) {
         Optional<AccountEntity> foundAccount = accountRepository.findById(id);
         if(foundAccount.isEmpty())
@@ -50,9 +56,20 @@ public class AccountService {
 
         AccountEntity updatedAccount = foundAccount.get();
         updatedAccount.deposit(amount);
+
+        transactionRepository.save(TransactionEntity
+                .builder()
+                .amount(amount)
+                .type(TransactionTypeEnum.DEPOSIT)
+                .time(LocalDateTime.now())
+                .senderAccount(updatedAccount)
+                .receiverId(null)
+                .build());
+
         return accountRepository.save(updatedAccount);
     }
 
+    @Transactional
     public AccountEntity withdraw(Long id, BigDecimal amount) {
         Optional<AccountEntity> foundAccount = accountRepository.findById(id);
         if(foundAccount.isEmpty())
@@ -64,6 +81,16 @@ public class AccountService {
             throw new WrongWithdrawException("Wrong withdraw");
 
         updatedAccount.withdraw(amount);
+
+        transactionRepository.save(TransactionEntity
+                .builder()
+                .amount(amount)
+                .type(TransactionTypeEnum.WITHDRAW)
+                .time(LocalDateTime.now())
+                .senderAccount(updatedAccount)
+                .receiverId(null)
+                .build());
+
         return accountRepository.save(updatedAccount);
     }
 
@@ -91,6 +118,16 @@ public class AccountService {
         receiverAccount.deposit(amount);
         accountRepository.save(senderAccount);
         accountRepository.save(receiverAccount);
+
+        transactionRepository.save(TransactionEntity
+                .builder()
+                .amount(amount)
+                .type(TransactionTypeEnum.TRANSFER)
+                .time(LocalDateTime.now())
+                .senderAccount(senderAccount)
+                .receiverId(receiverAccount.getId())
+                .build());
+
         return senderAccount;
     }
 }
