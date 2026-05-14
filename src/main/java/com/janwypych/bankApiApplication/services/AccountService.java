@@ -1,6 +1,9 @@
 package com.janwypych.bankApiApplication.services;
 
 import com.janwypych.bankApiApplication.entities.AccountEntity;
+import com.janwypych.bankApiApplication.exeption.AccountNotFoundException;
+import com.janwypych.bankApiApplication.exeption.EmailAlreadyExistsException;
+import com.janwypych.bankApiApplication.exeption.WrongPasswordException;
 import com.janwypych.bankApiApplication.repositories.AccountRepository;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +20,7 @@ public class AccountService {
 
     public AccountEntity addAccount(AccountEntity accountEntity) {
         if(accountRepository.existsByEmail(accountEntity.getEmail()))
-            throw new RuntimeException("Email already exists");
+            throw new EmailAlreadyExistsException("Email already exists");
         
         accountEntity.setBalance(BigDecimal.ZERO);
         
@@ -28,12 +31,12 @@ public class AccountService {
         Optional<AccountEntity> foundAccount = accountRepository.findByEmail(accountEntity.getEmail());
         
         if(foundAccount.isEmpty())
-            throw new RuntimeException("Account not found");
+            throw new AccountNotFoundException("Account not found");
         
         AccountEntity loggedAccount = foundAccount.get();
         
         if(!loggedAccount.getPassword().equals(accountEntity.getPassword()))
-            throw new RuntimeException("Wrong Password");
+            throw new WrongPasswordException("Wrong Password");
         
         return loggedAccount;
     }

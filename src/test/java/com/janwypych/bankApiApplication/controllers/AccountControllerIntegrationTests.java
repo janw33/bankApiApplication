@@ -1,6 +1,7 @@
 package com.janwypych.bankApiApplication.controllers;
 
 import com.janwypych.bankApiApplication.Dto.CreateAccountRequest;
+import com.janwypych.bankApiApplication.Dto.LoginRequest;
 import com.janwypych.bankApiApplication.TestDataUtil;
 import com.janwypych.bankApiApplication.entities.AccountEntity;
 import com.janwypych.bankApiApplication.services.AccountService;
@@ -35,26 +36,41 @@ public class AccountControllerIntegrationTests {
     }
 
     @Test
-    public void testThatCreateAccountReturnHttp201() throws Exception {
+    public void testThatCreateAccountReturnsHttp201WhenEmailAvailable() throws Exception {
         CreateAccountRequest createAccountRequest = TestDataUtil.createCreateAccountRequest();
         String accountJson = objectMapper.writeValueAsString(createAccountRequest);
 
         mockMvc.perform(
-                MockMvcRequestBuilders.post("/accounts")
+                MockMvcRequestBuilders.post("/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(accountJson)
         ).andExpect(
                 MockMvcResultMatchers.status().isCreated()
         );
     }
+    @Test
+    public void testThatCreateAccountReturnsHttp409WhenEmailUnavailable() throws Exception {
+        AccountEntity accountEntity = TestDataUtil.createAccountEntity();
+        accountService.addAccount(accountEntity);
 
+        CreateAccountRequest createAccountRequest = TestDataUtil.createCreateAccountRequest();
+        String accountJson = objectMapper.writeValueAsString(createAccountRequest);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.post("/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(accountJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isConflict()
+        );
+    }
     @Test
     public void testThatCreateAccountReturnsAccount() throws Exception {
         CreateAccountRequest createAccountRequest = TestDataUtil.createCreateAccountRequest();
         String accountJson = objectMapper.writeValueAsString(createAccountRequest);
 
         mockMvc.perform(
-                MockMvcRequestBuilders.post("/accounts")
+                MockMvcRequestBuilders.post("/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(accountJson)
         ).andExpect(
@@ -65,6 +81,19 @@ public class AccountControllerIntegrationTests {
                 MockMvcResultMatchers.jsonPath("$.email").value("janWypych@email.com")
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.balance").value(BigDecimal.ZERO)
+        );
+    }
+    @Test
+    public void testThatLoginReturnsHttp404WhenAccountDoesntExist() throws Exception {
+        LoginRequest loginRequest = TestDataUtil.createLoginRequest();
+        String loginJson = objectMapper.writeValueAsString(loginRequest);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.post("/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isNotFound()
         );
     }
 }
