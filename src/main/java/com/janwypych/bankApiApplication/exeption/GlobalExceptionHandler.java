@@ -43,5 +43,14 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST
         );
     }
+    @ExceptionHandler(WrongWithdrawException.class)
+    public ResponseEntity<String> handleWrongWithdraw(
+            WrongWithdrawException wwe) {
+
+        return new ResponseEntity<>(
+                wwe.getMessage(),
+                HttpStatus.BAD_REQUEST
+        );
+    }
 
 }

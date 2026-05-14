@@ -1,10 +1,7 @@
 package com.janwypych.bankApiApplication.services;
 
 import com.janwypych.bankApiApplication.entities.AccountEntity;
-import com.janwypych.bankApiApplication.exeption.AccountNotFoundException;
-import com.janwypych.bankApiApplication.exeption.EmailAlreadyExistsException;
-import com.janwypych.bankApiApplication.exeption.WrongDepositException;
-import com.janwypych.bankApiApplication.exeption.WrongPasswordException;
+import com.janwypych.bankApiApplication.exeption.*;
 import com.janwypych.bankApiApplication.repositories.AccountRepository;
 import org.springframework.stereotype.Service;
 
@@ -48,10 +45,24 @@ public class AccountService {
             throw new AccountNotFoundException("Account not found");
 
         if(amount.compareTo(BigDecimal.ZERO) <= 0)
-            throw new WrongDepositException("Wrong Deposit");
+            throw new WrongDepositException("Wrong deposit");
 
         AccountEntity updatedAccount = foundAccount.get();
         updatedAccount.deposit(amount);
+        return accountRepository.save(updatedAccount);
+    }
+
+    public AccountEntity withdraw(Long id, BigDecimal amount) {
+        Optional<AccountEntity> foundAccount = accountRepository.findById(id);
+        if(foundAccount.isEmpty())
+            throw new AccountNotFoundException("Account not found");
+
+        AccountEntity updatedAccount = foundAccount.get();
+
+        if(amount.compareTo(BigDecimal.ZERO) <= 0 || amount.compareTo(updatedAccount.getBalance()) > 0)
+            throw new WrongWithdrawException("Wrong withdraw");
+
+        updatedAccount.withdraw(amount);
         return accountRepository.save(updatedAccount);
     }
 }

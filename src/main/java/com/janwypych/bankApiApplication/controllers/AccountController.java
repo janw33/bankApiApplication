@@ -1,9 +1,6 @@
 package com.janwypych.bankApiApplication.controllers;
 
-import com.janwypych.bankApiApplication.Dto.AccountResponse;
-import com.janwypych.bankApiApplication.Dto.CreateAccountRequest;
-import com.janwypych.bankApiApplication.Dto.DepositRequest;
-import com.janwypych.bankApiApplication.Dto.LoginRequest;
+import com.janwypych.bankApiApplication.Dto.*;
 import com.janwypych.bankApiApplication.entities.AccountEntity;
 import com.janwypych.bankApiApplication.mappers.AccountMapper;
 import com.janwypych.bankApiApplication.services.AccountService;
@@ -43,6 +40,13 @@ public class AccountController {
             @PathVariable("id") Long id,
             @RequestBody DepositRequest depositRequest) {
         AccountEntity accountEntity = accountService.deposit(id, depositRequest.getAmount());
+        return new ResponseEntity<>(accountMapper.mapToAccountResponse(accountEntity), HttpStatus.OK);
+    }
+    @PatchMapping(path = "/withdraw/{id}")
+    public ResponseEntity<AccountResponse> withdraw(
+            @PathVariable("id") Long id,
+            @RequestBody WithdrawRequest withdrawRequest) {
+        AccountEntity accountEntity = accountService.withdraw(id, withdrawRequest.getAmount());
         return new ResponseEntity<>(accountMapper.mapToAccountResponse(accountEntity), HttpStatus.OK);
     }
 }
