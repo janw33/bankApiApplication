@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -33,6 +34,10 @@ public class AccountEntity {
 
     @Column(nullable = false)
     private BigDecimal balance;
+
+    @OneToMany(mappedBy = "account")
+    private List<TransactionEntity> transactions;
+
 
     public void deposit(BigDecimal amount) {
         this.balance = this.balance.add(amount);
