@@ -3,6 +3,7 @@ package com.janwypych.bankApiApplication;
 import com.janwypych.bankApiApplication.Dto.CreateAccountRequest;
 import com.janwypych.bankApiApplication.Dto.DepositRequest;
 import com.janwypych.bankApiApplication.Dto.LoginRequest;
+import com.janwypych.bankApiApplication.Dto.WithdrawRequest;
 import com.janwypych.bankApiApplication.entities.AccountEntity;
 
 import java.math.BigDecimal;
@@ -33,7 +34,12 @@ public final class TestDataUtil {
     }
     public static DepositRequest createDepositRequest() {
         return DepositRequest.builder()
-                .amount(BigDecimal.valueOf(10))
+                .amount(BigDecimal.TEN)
+                .build();
+    }
+    public static WithdrawRequest createWithdrawRequest() {
+        return WithdrawRequest.builder()
+                .amount(BigDecimal.TEN)
                 .build();
     }
 }

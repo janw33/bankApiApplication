@@ -3,6 +3,7 @@ package com.janwypych.bankApiApplication.controllers;
 import com.janwypych.bankApiApplication.Dto.CreateAccountRequest;
 import com.janwypych.bankApiApplication.Dto.DepositRequest;
 import com.janwypych.bankApiApplication.Dto.LoginRequest;
+import com.janwypych.bankApiApplication.Dto.WithdrawRequest;
 import com.janwypych.bankApiApplication.TestDataUtil;
 import com.janwypych.bankApiApplication.entities.AccountEntity;
 import com.janwypych.bankApiApplication.services.AccountService;
@@ -85,7 +86,7 @@ public class AccountControllerIntegrationTests {
         );
     }
     @Test
-    public void testThatLoginReturnsHttp401WhenAccountDoesntExist() throws Exception {
+    public void testThatLoginReturnsHttp404WhenAccountDoesntExist() throws Exception {
         LoginRequest loginRequest = TestDataUtil.createLoginRequest();
         String loginJson = objectMapper.writeValueAsString(loginRequest);
 
@@ -94,7 +95,7 @@ public class AccountControllerIntegrationTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(loginJson)
         ).andExpect(
-                MockMvcResultMatchers.status().isUnauthorized()
+                MockMvcResultMatchers.status().isNotFound()
         );
     }
     @Test
@@ -151,7 +152,7 @@ public class AccountControllerIntegrationTests {
         );
     }
     @Test
-    public void testThatDepositReturnsHttp401WhenAccountDoesntExist() throws Exception {
+    public void testThatDepositReturnsHttp404WhenAccountDoesntExist() throws Exception {
         DepositRequest depositRequest = TestDataUtil.createDepositRequest();
         String depositJson = objectMapper.writeValueAsString(depositRequest);
         mockMvc.perform(
@@ -159,11 +160,11 @@ public class AccountControllerIntegrationTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(depositJson)
         ).andExpect(
-                MockMvcResultMatchers.status().isUnauthorized()
+                MockMvcResultMatchers.status().isNotFound()
         );
     }
     @Test
-    public void testThatDepositReturnsHttp400WhenAccountExistButAmountIsWrong() throws Exception {
+    public void testThatDepositReturnsHttp400WhenAccountExistButAmountIsLowerThan0() throws Exception {
         AccountEntity accountEntity = TestDataUtil.createAccountEntity();
         accountService.addAccount(accountEntity);
 
@@ -216,5 +217,84 @@ public class AccountControllerIntegrationTests {
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.balance").value(depositRequest.getAmount().intValue()));
     }
+    @Test
+    public void testThatWithdrawReturnsHttp404WhenAccountDoesntExist() throws Exception {
+        WithdrawRequest withdrawRequest = TestDataUtil.createWithdrawRequest();
+        String withdrawJson = objectMapper.writeValueAsString(withdrawRequest);
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch("/withdraw/3")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(withdrawJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isNotFound()
+        );
+    }
+    @Test
+    public void testThatWithdrawReturnsHttp400WhenAccountExistButAmountIsLowerThanZero() throws Exception {
+        AccountEntity accountEntity = TestDataUtil.createAccountEntity();
+        accountService.addAccount(accountEntity);
 
+        WithdrawRequest withdrawRequest = TestDataUtil.createWithdrawRequest();
+        withdrawRequest.setAmount(BigDecimal.valueOf(-1));
+        String withdrawJson = objectMapper.writeValueAsString(withdrawRequest);
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch("/withdraw/" + accountEntity.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(withdrawJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isBadRequest()
+        );
+    }
+    @Test
+    public void testThatWithdrawReturnsHttp400WhenAccountExistButAmountIsGreaterThanBalance() throws Exception {
+        AccountEntity accountEntity = TestDataUtil.createAccountEntity();
+        accountService.addAccount(accountEntity);
+
+        WithdrawRequest withdrawRequest = TestDataUtil.createWithdrawRequest();
+        String withdrawJson = objectMapper.writeValueAsString(withdrawRequest);
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch("/withdraw/" + accountEntity.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(withdrawJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isBadRequest()
+        );
+    }
+    @Test
+    public void testThatWithdrawReturnsHttp200WhenAccountExistAndAmountIsValid() throws Exception {
+        AccountEntity accountEntity = TestDataUtil.createAccountEntity();
+        accountService.addAccount(accountEntity);
+        accountService.deposit(accountEntity.getId(), BigDecimal.valueOf(100));
+
+        WithdrawRequest withdrawRequest = TestDataUtil.createWithdrawRequest();
+        String withdrawJson = objectMapper.writeValueAsString(withdrawRequest);
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch("/withdraw/" + accountEntity.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(withdrawJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isOk()
+        );
+    }
+    @Test
+    public void testThatWithdrawReturnsAccountWhenAccountExistAndAmountIsValid() throws Exception {
+        AccountEntity accountEntity = TestDataUtil.createAccountEntity();
+        accountService.addAccount(accountEntity);
+        AccountEntity updatedAccount = accountService.deposit(accountEntity.getId(), BigDecimal.valueOf(100));
+
+        WithdrawRequest withdrawRequest = TestDataUtil.createWithdrawRequest();
+        String withdrawJson = objectMapper.writeValueAsString(withdrawRequest);
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch("/withdraw/" + accountEntity.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(withdrawJson)
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.firstName").value(accountEntity.getFirstName())
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.lastName").value(accountEntity.getLastName())
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.email").value(accountEntity.getEmail())
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.balance").value((updatedAccount.getBalance().subtract(withdrawRequest.getAmount()).intValue())));
+    }
 }
