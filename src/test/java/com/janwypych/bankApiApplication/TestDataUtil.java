@@ -1,21 +1,26 @@
 package com.janwypych.bankApiApplication;
 
-import com.janwypych.bankApiApplication.Dto.CreateAccountRequest;
-import com.janwypych.bankApiApplication.Dto.DepositRequest;
-import com.janwypych.bankApiApplication.Dto.LoginRequest;
-import com.janwypych.bankApiApplication.Dto.WithdrawRequest;
+import com.janwypych.bankApiApplication.Dto.*;
 import com.janwypych.bankApiApplication.entities.AccountEntity;
 
 import java.math.BigDecimal;
 
 public final class TestDataUtil {
 
-    public static AccountEntity createAccountEntity() {
+    public static AccountEntity createAccountEntity1() {
         return AccountEntity.builder()
                 .firstName("Jan")
                 .lastName("Wypych")
                 .email("janWypych@email.com")
                 .password("password")
+                .build();
+    }
+    public static AccountEntity createAccountEntity2() {
+        return AccountEntity.builder()
+                .firstName("123")
+                .lastName("123")
+                .email("123@email.com")
+                .password("123")
                 .build();
     }
     public static CreateAccountRequest createCreateAccountRequest() {
@@ -39,6 +44,13 @@ public final class TestDataUtil {
     }
     public static WithdrawRequest createWithdrawRequest() {
         return WithdrawRequest.builder()
+                .amount(BigDecimal.TEN)
+                .build();
+    }
+    public static TransferRequest createTransferRequest() {
+        return TransferRequest.builder()
+                .senderId(1L)
+                .receiverId(2L)
                 .amount(BigDecimal.TEN)
                 .build();
     }

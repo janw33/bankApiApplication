@@ -1,9 +1,6 @@
 package com.janwypych.bankApiApplication.controllers;
 
-import com.janwypych.bankApiApplication.Dto.CreateAccountRequest;
-import com.janwypych.bankApiApplication.Dto.DepositRequest;
-import com.janwypych.bankApiApplication.Dto.LoginRequest;
-import com.janwypych.bankApiApplication.Dto.WithdrawRequest;
+import com.janwypych.bankApiApplication.Dto.*;
 import com.janwypych.bankApiApplication.TestDataUtil;
 import com.janwypych.bankApiApplication.entities.AccountEntity;
 import com.janwypych.bankApiApplication.services.AccountService;
@@ -52,7 +49,7 @@ public class AccountControllerIntegrationTests {
     }
     @Test
     public void testThatCreateAccountReturnsHttp409WhenEmailUnavailable() throws Exception {
-        AccountEntity accountEntity = TestDataUtil.createAccountEntity();
+        AccountEntity accountEntity = TestDataUtil.createAccountEntity1();
         accountService.addAccount(accountEntity);
 
         CreateAccountRequest createAccountRequest = TestDataUtil.createCreateAccountRequest();
@@ -100,7 +97,7 @@ public class AccountControllerIntegrationTests {
     }
     @Test
     public void testThatLoginReturnsHttp401WhenGivenPasswordIsWrong() throws Exception {
-        AccountEntity accountEntity = TestDataUtil.createAccountEntity();
+        AccountEntity accountEntity = TestDataUtil.createAccountEntity1();
         accountService.addAccount(accountEntity);
 
         LoginRequest loginRequest = TestDataUtil.createLoginRequest();
@@ -117,7 +114,7 @@ public class AccountControllerIntegrationTests {
     }
     @Test
     public void testThatLoginReturnsHttp200WhenAccountExistAndPasswordIsValid() throws Exception {
-        AccountEntity accountEntity = TestDataUtil.createAccountEntity();
+        AccountEntity accountEntity = TestDataUtil.createAccountEntity1();
         accountService.addAccount(accountEntity);
 
         LoginRequest loginRequest = TestDataUtil.createLoginRequest();
@@ -133,7 +130,7 @@ public class AccountControllerIntegrationTests {
     }
     @Test
     public void testThatLoginReturnsAccount() throws Exception {
-        AccountEntity accountEntity = TestDataUtil.createAccountEntity();
+        AccountEntity accountEntity = TestDataUtil.createAccountEntity1();
         accountService.addAccount(accountEntity);
 
         LoginRequest loginRequest = TestDataUtil.createLoginRequest();
@@ -165,7 +162,7 @@ public class AccountControllerIntegrationTests {
     }
     @Test
     public void testThatDepositReturnsHttp400WhenAccountExistButAmountIsLowerThan0() throws Exception {
-        AccountEntity accountEntity = TestDataUtil.createAccountEntity();
+        AccountEntity accountEntity = TestDataUtil.createAccountEntity1();
         accountService.addAccount(accountEntity);
 
         DepositRequest depositRequest = TestDataUtil.createDepositRequest();
@@ -182,7 +179,7 @@ public class AccountControllerIntegrationTests {
     }
     @Test
     public void testThatDepositReturnsHttp200WhenAccountExistAndAmountIsValid() throws Exception {
-        AccountEntity accountEntity = TestDataUtil.createAccountEntity();
+        AccountEntity accountEntity = TestDataUtil.createAccountEntity1();
         accountService.addAccount(accountEntity);
 
         DepositRequest depositRequest = TestDataUtil.createDepositRequest();
@@ -198,7 +195,7 @@ public class AccountControllerIntegrationTests {
     }
     @Test
     public void testThatDepositReturnsAccountWhenAccountExistsAndAmountIsValid() throws Exception {
-        AccountEntity accountEntity = TestDataUtil.createAccountEntity();
+        AccountEntity accountEntity = TestDataUtil.createAccountEntity1();
         accountService.addAccount(accountEntity);
 
         DepositRequest depositRequest = TestDataUtil.createDepositRequest();
@@ -231,7 +228,7 @@ public class AccountControllerIntegrationTests {
     }
     @Test
     public void testThatWithdrawReturnsHttp400WhenAccountExistButAmountIsLowerThanZero() throws Exception {
-        AccountEntity accountEntity = TestDataUtil.createAccountEntity();
+        AccountEntity accountEntity = TestDataUtil.createAccountEntity1();
         accountService.addAccount(accountEntity);
 
         WithdrawRequest withdrawRequest = TestDataUtil.createWithdrawRequest();
@@ -247,7 +244,7 @@ public class AccountControllerIntegrationTests {
     }
     @Test
     public void testThatWithdrawReturnsHttp400WhenAccountExistButAmountIsGreaterThanBalance() throws Exception {
-        AccountEntity accountEntity = TestDataUtil.createAccountEntity();
+        AccountEntity accountEntity = TestDataUtil.createAccountEntity1();
         accountService.addAccount(accountEntity);
 
         WithdrawRequest withdrawRequest = TestDataUtil.createWithdrawRequest();
@@ -262,7 +259,7 @@ public class AccountControllerIntegrationTests {
     }
     @Test
     public void testThatWithdrawReturnsHttp200WhenAccountExistAndAmountIsValid() throws Exception {
-        AccountEntity accountEntity = TestDataUtil.createAccountEntity();
+        AccountEntity accountEntity = TestDataUtil.createAccountEntity1();
         accountService.addAccount(accountEntity);
         accountService.deposit(accountEntity.getId(), BigDecimal.valueOf(100));
 
@@ -278,7 +275,7 @@ public class AccountControllerIntegrationTests {
     }
     @Test
     public void testThatWithdrawReturnsAccountWhenAccountExistAndAmountIsValid() throws Exception {
-        AccountEntity accountEntity = TestDataUtil.createAccountEntity();
+        AccountEntity accountEntity = TestDataUtil.createAccountEntity1();
         accountService.addAccount(accountEntity);
         AccountEntity updatedAccount = accountService.deposit(accountEntity.getId(), BigDecimal.valueOf(100));
 
@@ -297,4 +294,112 @@ public class AccountControllerIntegrationTests {
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.balance").value((updatedAccount.getBalance().subtract(withdrawRequest.getAmount()).intValue())));
     }
+
+    @Test
+    public void testThatTransferReturnsHttp400WhenAmountIsLowerThanZero() throws Exception {
+        TransferRequest transferRequest = TestDataUtil.createTransferRequest();
+        transferRequest.setAmount(BigDecimal.valueOf(-1));
+        String transferJson = objectMapper.writeValueAsString(transferRequest);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch("/transfer")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(transferJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isBadRequest()
+        );
+    }
+    @Test
+    public void testThatTransferReturnsHttp404WhenSenderAccountDoesntExist() throws Exception {
+        TransferRequest transferRequest = TestDataUtil.createTransferRequest();
+        String transferJson = objectMapper.writeValueAsString(transferRequest);
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch("/transfer")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(transferJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isNotFound()
+        );
+    }
+    @Test
+    public void testThatTransferReturnsHttp404WhenReceiverAccountDoesntExist() throws Exception {
+        AccountEntity senderAccount = TestDataUtil.createAccountEntity1();
+        accountService.addAccount(senderAccount);
+
+        TransferRequest transferRequest = TestDataUtil.createTransferRequest();
+        String transferJson = objectMapper.writeValueAsString(transferRequest);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch("/transfer")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(transferJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isNotFound()
+        );
+    }
+    @Test
+    public void testThatTransferReturnsHttp400WhenAmountIsGreaterThanSenderBalance() throws Exception {
+        AccountEntity senderAccount = TestDataUtil.createAccountEntity1();
+        accountService.addAccount(senderAccount);
+
+        AccountEntity receiverAccount = TestDataUtil.createAccountEntity2();
+        accountService.addAccount(receiverAccount);
+
+        TransferRequest transferRequest = TestDataUtil.createTransferRequest();
+        String transferJson = objectMapper.writeValueAsString(transferRequest);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch("/transfer")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(transferJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isBadRequest()
+        );
+    }
+    @Test
+    public void testThatTransferReturnsHttp200WhenSenderAndReceiverAccountExistsAndAmountIsValid() throws Exception {
+        AccountEntity senderAccount = TestDataUtil.createAccountEntity1();
+        accountService.addAccount(senderAccount);
+        AccountEntity updatedSenderAccount = accountService.deposit(senderAccount.getId(), BigDecimal.valueOf(100));
+
+        AccountEntity receiverAccount = TestDataUtil.createAccountEntity2();
+        accountService.addAccount(receiverAccount);
+
+        TransferRequest transferRequest = TestDataUtil.createTransferRequest();
+        String transferJson = objectMapper.writeValueAsString(transferRequest);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch("/transfer")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(transferJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isOk()
+        );
+    }
+    @Test
+    public void testThatTransferReturnsAccountWhenSenderAndReceiverAccountExistsAndAmountIsValid() throws Exception {
+        AccountEntity senderAccount = TestDataUtil.createAccountEntity1();
+        accountService.addAccount(senderAccount);
+        AccountEntity updatedSenderAccount = accountService.deposit(senderAccount.getId(), BigDecimal.valueOf(100));
+
+        AccountEntity receiverAccount = TestDataUtil.createAccountEntity2();
+        accountService.addAccount(receiverAccount);
+
+        TransferRequest transferRequest = TestDataUtil.createTransferRequest();
+        String transferJson = objectMapper.writeValueAsString(transferRequest);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch("/transfer")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(transferJson)
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.firstName").value(senderAccount.getFirstName())
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.lastName").value(senderAccount.getLastName())
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.email").value(senderAccount.getEmail())
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.balance").value((updatedSenderAccount.getBalance().subtract(transferRequest.getAmount()).intValue())));
+    }
 }
+
