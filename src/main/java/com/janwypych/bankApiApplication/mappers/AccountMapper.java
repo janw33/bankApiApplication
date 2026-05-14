@@ -2,6 +2,7 @@ package com.janwypych.bankApiApplication.mappers;
 
 import com.janwypych.bankApiApplication.Dto.AccountResponse;
 import com.janwypych.bankApiApplication.Dto.CreateAccountRequest;
+import com.janwypych.bankApiApplication.Dto.LoginRequest;
 import com.janwypych.bankApiApplication.entities.AccountEntity;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
@@ -24,6 +25,10 @@ import org.springframework.stereotype.Component;
 
         public AccountEntity mapFromCreateAccountRequest(CreateAccountRequest accountRequest) {
             return modelMapper.map(accountRequest, AccountEntity.class);
+        }
+
+        public AccountEntity mapFromLoginAccount(LoginRequest loginRequest) {
+            return modelMapper.map(loginRequest, AccountEntity.class);
         }
     }
 
