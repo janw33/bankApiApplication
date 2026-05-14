@@ -52,7 +52,6 @@ public class AccountService {
 
         AccountEntity updatedAccount = foundAccount.get();
         updatedAccount.deposit(amount);
-        accountRepository.save(updatedAccount);
-        return updatedAccount;
+        return accountRepository.save(updatedAccount);
     }
 }
