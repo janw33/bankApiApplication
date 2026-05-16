@@ -61,4 +61,13 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST
         );
     }
+    @ExceptionHandler(InvalidIdException.class)
+    public ResponseEntity<String> handleWrongSenderReceiverIdException(
+            InvalidIdException iie) {
+
+        return new ResponseEntity<>(
+                iie.getMessage(),
+                HttpStatus.BAD_REQUEST
+        );
+    }
 }

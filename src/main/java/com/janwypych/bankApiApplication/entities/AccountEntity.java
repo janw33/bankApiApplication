@@ -35,7 +35,7 @@ public class AccountEntity {
     @Column(nullable = false)
     private BigDecimal balance;
 
-    @OneToMany(mappedBy = "account")
+    @OneToMany(mappedBy = "senderAccount")
     private List<TransactionEntity> transactions;
 
 

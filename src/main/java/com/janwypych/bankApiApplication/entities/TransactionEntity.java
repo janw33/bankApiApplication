@@ -29,7 +29,7 @@ public class TransactionEntity {
     private LocalDateTime time;
 
     @ManyToOne
-    @JoinColumn(name = "account_id")
+    @JoinColumn(name = "senderAccount_id")
     private AccountEntity senderAccount;
 
     private Long receiverId;

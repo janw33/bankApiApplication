@@ -1,0 +1,25 @@
+package com.janwypych.bankApiApplication.controllers;
+
+import com.janwypych.bankApiApplication.Dto.TransactionDto;
+import com.janwypych.bankApiApplication.entities.TransactionEntity;
+import com.janwypych.bankApiApplication.services.TransactionService;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+@RestController
+public class TransactionController {
+    private final TransactionService transactionService;
+
+    public TransactionController(TransactionService transactionService) {
+        this.transactionService = transactionService;
+    }
+
+//    @GetMapping("/transaction/account/{id}")
+//    public List<TransactionDto> getAccountTransactions(
+//            @PathVariable("id") Long id) {
+//        List<TransactionEntity> TaransactionsEntity = transactionService.findAccountTransactions(id);
+//    }
+}

@@ -149,6 +149,46 @@ public class AccountControllerIntegrationTests {
         );
     }
     @Test
+    public void testThatDepositReturnsHttp400WhenIdIsNull() throws Exception {
+        DepositRequest depositRequest = TestDataUtil.createDepositRequest();
+        String depositJson = objectMapper.writeValueAsString(depositRequest);
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch("/deposit/null")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(depositJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isBadRequest()
+        );
+    }
+    @Test
+    public void testThatDepositReturnsHttp400WhenAmountIsNull() throws Exception {
+        DepositRequest depositRequest = TestDataUtil.createDepositRequest();
+        depositRequest.setAmount(null);
+        String depositJson = objectMapper.writeValueAsString(depositRequest);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch("/deposit/3")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(depositJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isBadRequest()
+        );
+    }
+    @Test
+    public void testThatDepositReturnsHttp400WhenAmountIsLowerThan0() throws Exception {
+        DepositRequest depositRequest = TestDataUtil.createDepositRequest();
+        depositRequest.setAmount(BigDecimal.valueOf(-1));
+        String depositJson = objectMapper.writeValueAsString(depositRequest);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch("/deposit/3")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(depositJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isBadRequest()
+        );
+    }
+    @Test
     public void testThatDepositReturnsHttp404WhenAccountDoesntExist() throws Exception {
         DepositRequest depositRequest = TestDataUtil.createDepositRequest();
         String depositJson = objectMapper.writeValueAsString(depositRequest);
@@ -160,23 +200,7 @@ public class AccountControllerIntegrationTests {
                 MockMvcResultMatchers.status().isNotFound()
         );
     }
-    @Test
-    public void testThatDepositReturnsHttp400WhenAccountExistButAmountIsLowerThan0() throws Exception {
-        AccountEntity accountEntity = TestDataUtil.createAccountEntity1();
-        accountService.addAccount(accountEntity);
 
-        DepositRequest depositRequest = TestDataUtil.createDepositRequest();
-        depositRequest.setAmount(BigDecimal.valueOf(-1));
-        String depositJson = objectMapper.writeValueAsString(depositRequest);
-
-        mockMvc.perform(
-                MockMvcRequestBuilders.patch("/deposit/" + accountEntity.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(depositJson)
-        ).andExpect(
-                MockMvcResultMatchers.status().isBadRequest()
-        );
-    }
     @Test
     public void testThatDepositReturnsHttp200WhenAccountExistAndAmountIsValid() throws Exception {
         AccountEntity accountEntity = TestDataUtil.createAccountEntity1();
@@ -215,6 +239,44 @@ public class AccountControllerIntegrationTests {
                 MockMvcResultMatchers.jsonPath("$.balance").value(depositRequest.getAmount().intValue()));
     }
     @Test
+    public void testThatWithdrawReturnsHttp400WhenIdIsNull() throws Exception {
+        WithdrawRequest withdrawRequest = TestDataUtil.createWithdrawRequest();
+        String withdrawJson = objectMapper.writeValueAsString(withdrawRequest);
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch("/withdraw/null")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(withdrawJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isBadRequest()
+        );
+    }
+    @Test
+    public void testThatWithdrawReturnsHttp400WhenAmountIsNull() throws Exception {
+        WithdrawRequest withdrawRequest = TestDataUtil.createWithdrawRequest();
+        withdrawRequest.setAmount(null);
+        String withdrawJson = objectMapper.writeValueAsString(withdrawRequest);
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch("/withdraw/3")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(withdrawJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isBadRequest()
+        );
+    }
+    @Test
+    public void testThatWithdrawReturnsHttp400WhenAmountIsLowerThanZero() throws Exception {
+        WithdrawRequest withdrawRequest = TestDataUtil.createWithdrawRequest();
+        withdrawRequest.setAmount(BigDecimal.valueOf(-1));
+        String withdrawJson = objectMapper.writeValueAsString(withdrawRequest);
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch("/withdraw/3")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(withdrawJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isBadRequest()
+        );
+    }
+    @Test
     public void testThatWithdrawReturnsHttp404WhenAccountDoesntExist() throws Exception {
         WithdrawRequest withdrawRequest = TestDataUtil.createWithdrawRequest();
         String withdrawJson = objectMapper.writeValueAsString(withdrawRequest);
@@ -226,22 +288,7 @@ public class AccountControllerIntegrationTests {
                 MockMvcResultMatchers.status().isNotFound()
         );
     }
-    @Test
-    public void testThatWithdrawReturnsHttp400WhenAccountExistButAmountIsLowerThanZero() throws Exception {
-        AccountEntity accountEntity = TestDataUtil.createAccountEntity1();
-        accountService.addAccount(accountEntity);
 
-        WithdrawRequest withdrawRequest = TestDataUtil.createWithdrawRequest();
-        withdrawRequest.setAmount(BigDecimal.valueOf(-1));
-        String withdrawJson = objectMapper.writeValueAsString(withdrawRequest);
-        mockMvc.perform(
-                MockMvcRequestBuilders.patch("/withdraw/" + accountEntity.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(withdrawJson)
-        ).andExpect(
-                MockMvcResultMatchers.status().isBadRequest()
-        );
-    }
     @Test
     public void testThatWithdrawReturnsHttp400WhenAccountExistButAmountIsGreaterThanBalance() throws Exception {
         AccountEntity accountEntity = TestDataUtil.createAccountEntity1();
@@ -294,7 +341,63 @@ public class AccountControllerIntegrationTests {
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.balance").value((updatedAccount.getBalance().subtract(withdrawRequest.getAmount()).intValue())));
     }
+    @Test
+    public void testThatTransferReturnsHttp400WhenSenderIdIsNull() throws Exception {
+        TransferRequest transferRequest = TestDataUtil.createTransferRequest();
+        transferRequest.setSenderId(null);
+        String transferJson = objectMapper.writeValueAsString(transferRequest);
 
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch("/transfer")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(transferJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isBadRequest()
+        );
+    }
+    @Test
+    public void testThatTransferReturnsHttp400WhenReceiverIdIsNull() throws Exception {
+        TransferRequest transferRequest = TestDataUtil.createTransferRequest();
+        transferRequest.setSenderId(null);
+        String transferJson = objectMapper.writeValueAsString(transferRequest);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch("/transfer")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(transferJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isBadRequest()
+        );
+    }
+    @Test
+    public void testThatTransferReturnsHttp400WhenReceiverIdIsSameAsSenderId() throws Exception {
+        TransferRequest transferRequest = TestDataUtil.createTransferRequest();
+        transferRequest.setSenderId(1L);
+        transferRequest.setReceiverId(1L);
+        String transferJson = objectMapper.writeValueAsString(transferRequest);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch("/transfer")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(transferJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isBadRequest()
+        );
+    }
+    @Test
+    public void testThatTransferReturnsHttp400WhenAmountNull() throws Exception {
+        TransferRequest transferRequest = TestDataUtil.createTransferRequest();
+        transferRequest.setAmount(null);
+        String transferJson = objectMapper.writeValueAsString(transferRequest);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch("/transfer")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(transferJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isBadRequest()
+        );
+    }
     @Test
     public void testThatTransferReturnsHttp400WhenAmountIsLowerThanZero() throws Exception {
         TransferRequest transferRequest = TestDataUtil.createTransferRequest();
