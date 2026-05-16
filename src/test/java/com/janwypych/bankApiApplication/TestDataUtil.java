@@ -2,8 +2,11 @@ package com.janwypych.bankApiApplication;
 
 import com.janwypych.bankApiApplication.Dto.*;
 import com.janwypych.bankApiApplication.entities.AccountEntity;
+import com.janwypych.bankApiApplication.entities.TransactionEntity;
+import com.janwypych.bankApiApplication.entities.enums.TransactionTypeEnum;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 public final class TestDataUtil {
 
@@ -52,6 +55,17 @@ public final class TestDataUtil {
                 .senderId(1L)
                 .receiverId(2L)
                 .amount(BigDecimal.TEN)
+                .build();
+    }
+    public static TransactionEntity createTransactionEntity(AccountEntity senderAccount) {
+        return TransactionEntity
+                .builder()
+                .id(1L)
+                .amount(BigDecimal.TEN)
+                .type(TransactionTypeEnum.DEPOSIT)
+                .time(LocalDateTime.now())
+                .senderAccount(senderAccount)
+                .receiverId(null)
                 .build();
     }
 }

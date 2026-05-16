@@ -48,9 +48,6 @@ public class AccountService {
 
     @Transactional
     public AccountEntity deposit(Long id, BigDecimal amount) {
-        if(id == null)
-            throw new InvalidIdException("Id cannot be null");
-
         if(amount == null || amount.compareTo(BigDecimal.ZERO) <= 0)
             throw new WrongDepositException("Wrong deposit");
 
@@ -78,9 +75,6 @@ public class AccountService {
 
     @Transactional
     public AccountEntity withdraw(Long id, BigDecimal amount) {
-        if(id == null)
-            throw new InvalidIdException("Id cannot be null");
-
         if(amount == null || amount.compareTo(BigDecimal.ZERO) <= 0)
             throw new WrongWithdrawException("Wrong withdraw");
 

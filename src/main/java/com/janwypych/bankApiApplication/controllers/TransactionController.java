@@ -25,7 +25,7 @@ public class TransactionController {
         this.transactionMapper = transactionMapper;
     }
 
-    @GetMapping("/transaction/account/{id}")
+    @GetMapping("/transactions/account/{id}")
     public Page<TransactionDto> getAccountTransactions(
             @PathVariable("id") Long id,
             Pageable pageable) {

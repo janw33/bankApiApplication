@@ -22,9 +22,6 @@ public class TransactionService {
     }
 
     public Page<TransactionEntity> findAllAccountTransactions(Long id, Pageable pageable) {
-        if(id == null)
-            throw new InvalidIdException("Invalid id");
-
         if(!accountRepository.existsById(id))
             throw new AccountNotFoundException("Account does not exist");
 
