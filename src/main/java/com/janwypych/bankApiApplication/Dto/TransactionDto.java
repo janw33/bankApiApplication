@@ -16,6 +16,6 @@ public class TransactionDto {
     private BigDecimal amount;
     private TransactionTypeEnum type;
     private LocalDateTime time;
-    private AccountEntity senderAccount;
+    private Long senderId;
     private Long receiverId;
 }
