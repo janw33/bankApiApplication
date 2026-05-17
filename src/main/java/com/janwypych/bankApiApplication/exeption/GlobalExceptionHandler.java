@@ -45,9 +45,9 @@ public class GlobalExceptionHandler {
         );
     }
 
-    @ExceptionHandler(WrongTransferAmountException.class)
+    @ExceptionHandler(WrongTransferException.class)
     public ResponseEntity<String> handleWrongTransferAmount(
-            WrongTransferAmountException wtae) {
+            WrongTransferException wtae) {
 
         return new ResponseEntity<>(
                 wtae.getMessage(),

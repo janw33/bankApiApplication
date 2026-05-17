@@ -52,7 +52,7 @@ public class AccountController {
     }
     @PatchMapping(path = "/transfer")
     public ResponseEntity<AccountResponse> transfer(
-            @RequestBody TransferRequest transferRequest ) {
+            @Valid @RequestBody TransferRequest transferRequest ) {
         AccountEntity accountEntity = accountService.transfer(
                 transferRequest.getSenderId(),
                 transferRequest.getReceiverId(),

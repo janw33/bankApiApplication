@@ -96,14 +96,8 @@ public class AccountService {
 
     @Transactional
     public AccountEntity transfer(Long senderId, Long receiverId, BigDecimal amount) {
-        if(senderId == null || receiverId== null)
-            throw new InvalidIdException("Id cannot be null");
-
         if(Objects.equals(senderId, receiverId))
             throw new InvalidIdException("Sender and Receiver Id cannot be the same");
-
-        if(amount == null || amount.compareTo(BigDecimal.ZERO) <= 0)
-            throw new WrongTransferAmountException("Amount is invalid");
 
         Optional<AccountEntity> optionalSenderAccount = accountRepository.findById(senderId);
 
@@ -118,7 +112,7 @@ public class AccountService {
         AccountEntity senderAccount = optionalSenderAccount.get();
 
         if(amount.compareTo(senderAccount.getBalance()) > 0)
-            throw new WrongTransferAmountException("Amount is invalid");
+            throw new WrongTransferException("Not enough balance");
 
         AccountEntity receiverAccount = optionalReceiverAccount.get();
 
