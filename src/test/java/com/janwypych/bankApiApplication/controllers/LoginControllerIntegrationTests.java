@@ -1,6 +1,5 @@
 package com.janwypych.bankApiApplication.controllers;
 
-import com.janwypych.bankApiApplication.Dto.CreateAccountRequest;
 import com.janwypych.bankApiApplication.Dto.LoginRequest;
 import com.janwypych.bankApiApplication.TestDataUtil;
 import com.janwypych.bankApiApplication.entities.AccountEntity;
@@ -21,13 +20,13 @@ import tools.jackson.databind.ObjectMapper;
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @ActiveProfiles("test")
-public class LoginRequestControllerIntegrationTests {
+public class LoginControllerIntegrationTests {
     private final AccountService accountService;
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public LoginRequestControllerIntegrationTests(AccountService accountService, MockMvc mockMvc) {
+    public LoginControllerIntegrationTests(AccountService accountService, MockMvc mockMvc) {
         this.accountService = accountService;
         this.mockMvc = mockMvc;
         this.objectMapper = new ObjectMapper();

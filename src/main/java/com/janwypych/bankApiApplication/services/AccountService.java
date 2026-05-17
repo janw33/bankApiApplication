@@ -48,15 +48,10 @@ public class AccountService {
 
     @Transactional
     public AccountEntity deposit(Long id, BigDecimal amount) {
-        if(amount == null || amount.compareTo(BigDecimal.ZERO) <= 0)
-            throw new WrongDepositException("Wrong deposit");
-
         Optional<AccountEntity> foundAccount = accountRepository.findById(id);
 
         if(foundAccount.isEmpty())
             throw new AccountNotFoundException("Account not found");
-
-
 
         AccountEntity updatedAccount = foundAccount.get();
         updatedAccount.deposit(amount);

@@ -39,7 +39,7 @@ public class AccountController {
     @PatchMapping(path = "/deposit/{id}")
     public ResponseEntity<AccountResponse> deposit(
             @PathVariable("id") Long id,
-            @RequestBody DepositRequest depositRequest) {
+            @Valid @RequestBody DepositRequest depositRequest) {
         AccountEntity accountEntity = accountService.deposit(id, depositRequest.getAmount());
         return new ResponseEntity<>(accountMapper.mapToAccountResponse(accountEntity), HttpStatus.OK);
     }
