@@ -36,8 +36,10 @@ public class AccountEntity {
     private BigDecimal balance;
 
     @OneToMany(mappedBy = "senderAccount")
-    private List<TransactionEntity> transactions;
+    private List<TransactionEntity> sentTransactions;
 
+    @OneToMany(mappedBy = "receiverAccount")
+    private List<TransactionEntity> receivedTransactions;
 
     public void deposit(BigDecimal amount) {
         this.balance = this.balance.add(amount);

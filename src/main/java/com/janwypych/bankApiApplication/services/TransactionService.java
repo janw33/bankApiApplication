@@ -24,6 +24,6 @@ public class TransactionService {
         if(!accountRepository.existsById(id))
             throw new AccountNotFoundException("Account does not exist");
 
-        return transactionRepository.findAllBySenderAccountId(id, pageable);
+        return transactionRepository.findBySenderAccountIdOrReceiverAccountId(id, id, pageable);
     }
 }

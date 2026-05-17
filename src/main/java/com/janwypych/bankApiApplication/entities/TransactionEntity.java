@@ -29,8 +29,10 @@ public class TransactionEntity {
     private LocalDateTime time;
 
     @ManyToOne
-    @JoinColumn(name = "sender_account_id")
+    @JoinColumn(name = "sender_account_id", nullable = true)
     private AccountEntity senderAccount;
 
-    private Long receiverId;
+    @ManyToOne
+    @JoinColumn(name = "receiver_account_id", nullable = true)
+    private AccountEntity receiverAccount;
 }

@@ -80,4 +80,43 @@ public class TransactionControllerIntegrationTests {
                 MockMvcResultMatchers.jsonPath("$.content[0].senderId").value(accountEntity.getId())
         );
     }
+    @Test
+    public void testThatGetAccountTransactionReturnTransferTransactionForSenderAndReceiver() throws Exception {
+        AccountEntity senderAccount = TestDataUtil.createAccountEntity1();
+        accountService.addAccount(senderAccount);
+        accountService.deposit(senderAccount.getId(), BigDecimal.TEN);
+
+        AccountEntity receiverAccount = TestDataUtil.createAccountEntity2();
+        accountService.addAccount(receiverAccount);
+
+        accountService.transfer(senderAccount.getId(), receiverAccount.getId(), BigDecimal.TEN);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/transactions/account/" + senderAccount.getId())
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.content[1].id").value(2L)
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.content[1].amount").value(BigDecimal.TEN.intValue())
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.content[1].type").value(TransactionTypeEnum.TRANSFER.toString())
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.content[1].senderId").value(senderAccount.getId())
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.content[1].receiverId").value(receiverAccount.getId())
+        );
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/transactions/account/" + receiverAccount.getId())
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.content[0].id").value(2L)
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.content[0].amount").value(BigDecimal.TEN.intValue())
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.content[0].type").value(TransactionTypeEnum.TRANSFER.toString())
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.content[0].senderId").value(senderAccount.getId())
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.content[0].receiverId").value(receiverAccount.getId())
+        );
+    }
 }

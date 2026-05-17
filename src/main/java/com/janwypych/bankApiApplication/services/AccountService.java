@@ -69,7 +69,7 @@ public class AccountService {
                 .type(TransactionTypeEnum.DEPOSIT)
                 .time(LocalDateTime.now())
                 .senderAccount(updatedAccount)
-                .receiverId(null)
+                .receiverAccount(null)
                 .build());
 
         return accountRepository.save(updatedAccount);
@@ -95,7 +95,7 @@ public class AccountService {
                 .type(TransactionTypeEnum.WITHDRAW)
                 .time(LocalDateTime.now())
                 .senderAccount(updatedAccount)
-                .receiverId(null)
+                .receiverAccount(null)
                 .build());
 
         return accountRepository.save(updatedAccount);
@@ -134,9 +134,16 @@ public class AccountService {
                 .type(TransactionTypeEnum.TRANSFER)
                 .time(LocalDateTime.now())
                 .senderAccount(senderAccount)
-                .receiverId(receiverAccount.getId())
+                .receiverAccount(receiverAccount)
                 .build());
 
         return senderAccount;
+    }
+
+    public void delete(Long id) {
+        if(!accountRepository.existsById(id))
+            throw new AccountNotFoundException("Account not found");
+
+        accountRepository.deleteById(id);
     }
 }

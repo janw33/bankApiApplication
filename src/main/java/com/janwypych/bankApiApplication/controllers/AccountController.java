@@ -59,4 +59,10 @@ public class AccountController {
                 transferRequest.getAmount());
         return new ResponseEntity<>(accountMapper.mapToAccountResponse(accountEntity), HttpStatus.OK);
     }
+    @DeleteMapping(path = "/delete/{id}")
+    public ResponseEntity<String> delete(
+            @PathVariable ("id") Long id ) {
+        accountService.delete(id);
+        return new ResponseEntity<>("Account deleted successfully", HttpStatus.OK);
+    }
 }

@@ -65,7 +65,7 @@ public final class TestDataUtil {
                 .type(TransactionTypeEnum.DEPOSIT)
                 .time(LocalDateTime.now())
                 .senderAccount(senderAccount)
-                .receiverId(null)
+                .receiverAccount(null)
                 .build();
     }
 }
