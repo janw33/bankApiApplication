@@ -1,6 +1,7 @@
 package com.janwypych.bankApiApplication.Dto;
 
 
+import com.janwypych.bankApiApplication.entities.enums.AccountStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,4 +19,5 @@ public class AccountResponse {
     private String lastName;
     private String email;
     private BigDecimal balance;
+    private AccountStatus status;
 }

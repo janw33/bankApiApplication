@@ -3,6 +3,7 @@ package com.janwypych.bankApiApplication.controllers;
 import com.janwypych.bankApiApplication.Dto.CreateAccountRequest;
 import com.janwypych.bankApiApplication.TestDataUtil;
 import com.janwypych.bankApiApplication.entities.AccountEntity;
+import com.janwypych.bankApiApplication.entities.enums.AccountStatus;
 import com.janwypych.bankApiApplication.repositories.AccountRepository;
 import com.janwypych.bankApiApplication.services.AccountService;
 import org.junit.jupiter.api.Test;
@@ -276,6 +277,8 @@ public class CreateAccountControllerIntegrationTests {
                 MockMvcResultMatchers.jsonPath("$.email").value(createAccountRequest.getEmail())
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.balance").value(BigDecimal.ZERO)
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.status").value(AccountStatus.ACTIVE.toString())
         );
     }
     @Test

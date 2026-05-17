@@ -2,6 +2,7 @@ package com.janwypych.bankApiApplication.services;
 
 import com.janwypych.bankApiApplication.entities.AccountEntity;
 import com.janwypych.bankApiApplication.entities.TransactionEntity;
+import com.janwypych.bankApiApplication.entities.enums.AccountStatus;
 import com.janwypych.bankApiApplication.entities.enums.TransactionTypeEnum;
 import com.janwypych.bankApiApplication.exception.*;
 import com.janwypych.bankApiApplication.repositories.AccountRepository;
@@ -31,7 +32,7 @@ public class AccountService {
             throw new EmailAlreadyExistsException("Email already exists");
         
         accountEntity.setBalance(BigDecimal.ZERO);
-
+        accountEntity.setStatus(AccountStatus.ACTIVE);
         accountEntity.setPassword(
                 passwordEncoder.encode(accountEntity.getPassword())
         );

@@ -1,5 +1,6 @@
 package com.janwypych.bankApiApplication.entities;
 
+import com.janwypych.bankApiApplication.entities.enums.AccountStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -34,6 +35,9 @@ public class AccountEntity {
 
     @Column(nullable = false)
     private BigDecimal balance;
+
+    @Column(nullable = false)
+    private AccountStatus status;
 
     @OneToMany(mappedBy = "senderAccount")
     private List<TransactionEntity> sentTransactions;
