@@ -164,7 +164,21 @@ public class CreateAccountControllerIntegrationTests {
     @Test
     public void testThatCreateAccountReturnsHttp400WhenEmailIsTooLong() throws Exception {
         CreateAccountRequest createAccountRequest = TestDataUtil.createCreateAccountRequest();
-        createAccountRequest.setEmail("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+        createAccountRequest.setEmail("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@email.com");
+        String accountJson = objectMapper.writeValueAsString(createAccountRequest);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.post("/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(accountJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isBadRequest()
+        );
+    }
+    @Test
+    public void testThatCreateAccountReturnsHttp400WhenEmailIsBadFormat() throws Exception {
+        CreateAccountRequest createAccountRequest = TestDataUtil.createCreateAccountRequest();
+        createAccountRequest.setEmail("Jan123");
         String accountJson = objectMapper.writeValueAsString(createAccountRequest);
 
         mockMvc.perform(
@@ -204,20 +218,7 @@ public class CreateAccountControllerIntegrationTests {
                 MockMvcResultMatchers.status().isBadRequest()
         );
     }
-    @Test
-    public void testThatCreateAccountReturnsHttp400WhenEmailIsBadFormat() throws Exception {
-        CreateAccountRequest createAccountRequest = TestDataUtil.createCreateAccountRequest();
-        createAccountRequest.setEmail("Jan123");
-        String accountJson = objectMapper.writeValueAsString(createAccountRequest);
 
-        mockMvc.perform(
-                MockMvcRequestBuilders.post("/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(accountJson)
-        ).andExpect(
-                MockMvcResultMatchers.status().isBadRequest()
-        );
-    }
     @Test
     public void testThatCreateAccountReturnsHttp409WhenEmailUnavailable() throws Exception {
         AccountEntity accountEntity = TestDataUtil.createAccountEntity1();

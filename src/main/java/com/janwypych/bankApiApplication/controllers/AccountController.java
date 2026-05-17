@@ -30,7 +30,7 @@ public class AccountController {
 
     @PostMapping(path = "/login")
     public ResponseEntity<AccountResponse> login(
-            @RequestBody LoginRequest loginRequest) {
+            @Valid @RequestBody LoginRequest loginRequest) {
         AccountEntity accountEntity = accountMapper.mapFromLoginAccount(loginRequest);
         AccountEntity loggedAccount = accountService.login(accountEntity);
         return new ResponseEntity<>(accountMapper.mapToAccountResponse(loggedAccount), HttpStatus.OK);
