@@ -6,6 +6,7 @@ import com.janwypych.bankApiApplication.entities.enums.TransactionTypeEnum;
 import com.janwypych.bankApiApplication.exeption.*;
 import com.janwypych.bankApiApplication.repositories.AccountRepository;
 import com.janwypych.bankApiApplication.repositories.TransactionRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,17 +19,23 @@ import java.util.Optional;
 public class AccountService {
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public AccountService(AccountRepository accountRepository, TransactionRepository transactionRepository) {
+    public AccountService(AccountRepository accountRepository, TransactionRepository transactionRepository, PasswordEncoder passwordEncoder) {
     this.accountRepository = accountRepository;
-    this.transactionRepository = transactionRepository; }
+    this.transactionRepository = transactionRepository;
+    this.passwordEncoder = passwordEncoder;}
 
     public AccountEntity addAccount(AccountEntity accountEntity) {
         if(accountRepository.existsByEmail(accountEntity.getEmail()))
             throw new EmailAlreadyExistsException("Email already exists");
         
         accountEntity.setBalance(BigDecimal.ZERO);
-        
+
+        accountEntity.setPassword(
+                passwordEncoder.encode(accountEntity.getPassword())
+        );
+
         return accountRepository.save(accountEntity);
     }
 
@@ -40,7 +47,7 @@ public class AccountService {
         
         AccountEntity loggedAccount = foundAccount.get();
         
-        if(!loggedAccount.getPassword().equals(accountEntity.getPassword()))
+        if(!passwordEncoder.matches(accountEntity.getPassword(), loggedAccount.getPassword()))
             throw new WrongPasswordException("Wrong Password");
         
         return loggedAccount;
