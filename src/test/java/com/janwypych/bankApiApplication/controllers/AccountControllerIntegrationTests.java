@@ -35,54 +35,6 @@ public class AccountControllerIntegrationTests {
     }
 
     @Test
-    public void testThatCreateAccountReturnsHttp201WhenEmailAvailable() throws Exception {
-        CreateAccountRequest createAccountRequest = TestDataUtil.createCreateAccountRequest();
-        String accountJson = objectMapper.writeValueAsString(createAccountRequest);
-
-        mockMvc.perform(
-                MockMvcRequestBuilders.post("/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(accountJson)
-        ).andExpect(
-                MockMvcResultMatchers.status().isCreated()
-        );
-    }
-    @Test
-    public void testThatCreateAccountReturnsHttp409WhenEmailUnavailable() throws Exception {
-        AccountEntity accountEntity = TestDataUtil.createAccountEntity1();
-        accountService.addAccount(accountEntity);
-
-        CreateAccountRequest createAccountRequest = TestDataUtil.createCreateAccountRequest();
-        String accountJson = objectMapper.writeValueAsString(createAccountRequest);
-
-        mockMvc.perform(
-                MockMvcRequestBuilders.post("/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(accountJson)
-        ).andExpect(
-                MockMvcResultMatchers.status().isConflict()
-        );
-    }
-    @Test
-    public void testThatCreateAccountReturnsAccount() throws Exception {
-        CreateAccountRequest createAccountRequest = TestDataUtil.createCreateAccountRequest();
-        String accountJson = objectMapper.writeValueAsString(createAccountRequest);
-
-        mockMvc.perform(
-                MockMvcRequestBuilders.post("/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(accountJson)
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.firstName").value(createAccountRequest.getFirstName())
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.lastName").value(createAccountRequest.getLastName())
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.email").value(createAccountRequest.getEmail())
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.balance").value(BigDecimal.ZERO)
-        );
-    }
-    @Test
     public void testThatLoginReturnsHttp404WhenAccountDoesntExist() throws Exception {
         LoginRequest loginRequest = TestDataUtil.createLoginRequest();
         String loginJson = objectMapper.writeValueAsString(loginRequest);

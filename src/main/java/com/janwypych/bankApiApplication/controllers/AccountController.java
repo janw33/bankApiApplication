@@ -4,6 +4,7 @@ import com.janwypych.bankApiApplication.Dto.*;
 import com.janwypych.bankApiApplication.entities.AccountEntity;
 import com.janwypych.bankApiApplication.mappers.AccountMapper;
 import com.janwypych.bankApiApplication.services.AccountService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +22,7 @@ public class AccountController {
 
     @PostMapping(path = "/register")
     public ResponseEntity<AccountResponse> createAccount(
-            @RequestBody CreateAccountRequest createAccountRequest) {
+            @Valid @RequestBody CreateAccountRequest createAccountRequest) {
         AccountEntity account = accountMapper.mapFromCreateAccountRequest(createAccountRequest);
         AccountEntity addedAccount = accountService.addAccount(account);
         return new ResponseEntity<>(accountMapper.mapToAccountResponse(addedAccount), HttpStatus.CREATED);
