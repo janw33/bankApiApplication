@@ -70,9 +70,6 @@ public class AccountService {
 
     @Transactional
     public AccountEntity withdraw(Long id, BigDecimal amount) {
-        if(amount == null || amount.compareTo(BigDecimal.ZERO) <= 0)
-            throw new WrongWithdrawException("Wrong withdraw");
-
         Optional<AccountEntity> foundAccount = accountRepository.findById(id);
 
         if(foundAccount.isEmpty())

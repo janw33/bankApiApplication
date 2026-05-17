@@ -34,15 +34,7 @@ public class GlobalExceptionHandler {
                 HttpStatus.UNAUTHORIZED
         );
     }
-    @ExceptionHandler(WrongDepositException.class)
-    public ResponseEntity<String> handleWrongDeposit(
-            WrongDepositException wde) {
 
-        return new ResponseEntity<>(
-                wde.getMessage(),
-                HttpStatus.BAD_REQUEST
-        );
-    }
     @ExceptionHandler(WrongWithdrawException.class)
     public ResponseEntity<String> handleWrongWithdraw(
             WrongWithdrawException wwe) {
@@ -52,6 +44,7 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST
         );
     }
+
     @ExceptionHandler(WrongTransferAmountException.class)
     public ResponseEntity<String> handleWrongTransferAmount(
             WrongTransferAmountException wtae) {

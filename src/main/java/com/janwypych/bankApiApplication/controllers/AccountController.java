@@ -46,7 +46,7 @@ public class AccountController {
     @PatchMapping(path = "/withdraw/{id}")
     public ResponseEntity<AccountResponse> withdraw(
             @PathVariable("id") Long id,
-            @RequestBody WithdrawRequest withdrawRequest) {
+            @Valid @RequestBody WithdrawRequest withdrawRequest) {
         AccountEntity accountEntity = accountService.withdraw(id, withdrawRequest.getAmount());
         return new ResponseEntity<>(accountMapper.mapToAccountResponse(accountEntity), HttpStatus.OK);
     }
