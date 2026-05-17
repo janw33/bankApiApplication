@@ -59,7 +59,7 @@ public class AccountController {
                 transferRequest.getAmount());
         return new ResponseEntity<>(accountMapper.mapToAccountResponse(accountEntity), HttpStatus.OK);
     }
-    @PatchMapping(path = "accounts/{id}/status")
+    @PatchMapping(path = "/accounts/{id}/status")
     private ResponseEntity<AccountResponse> changeStatus(
             @PathVariable("id") Long id,
             @Valid @RequestBody ChangeStatusRequest changeStatusRequest

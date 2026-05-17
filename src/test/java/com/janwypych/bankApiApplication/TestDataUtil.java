@@ -3,6 +3,7 @@ package com.janwypych.bankApiApplication;
 import com.janwypych.bankApiApplication.Dto.*;
 import com.janwypych.bankApiApplication.entities.AccountEntity;
 import com.janwypych.bankApiApplication.entities.TransactionEntity;
+import com.janwypych.bankApiApplication.entities.enums.AccountStatus;
 import com.janwypych.bankApiApplication.entities.enums.TransactionTypeEnum;
 
 import java.math.BigDecimal;
@@ -66,6 +67,11 @@ public final class TestDataUtil {
                 .time(LocalDateTime.now())
                 .senderAccount(senderAccount)
                 .receiverAccount(null)
+                .build();
+    }
+    public static ChangeStatusRequest createChangeStatusRequest() {
+        return ChangeStatusRequest.builder()
+                .status(AccountStatus.INACTIVE)
                 .build();
     }
 }
