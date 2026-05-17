@@ -122,4 +122,22 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST
         );
     }
+    @ExceptionHandler(AccountIsInactiveException.class)
+    public ResponseEntity<ErrorResponseDto> handeAccountIsInactiveException(
+            AccountIsInactiveException accountIsInactiveException,
+            HttpServletRequest request ) {
+
+        ErrorResponseDto error = ErrorResponseDto.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.FORBIDDEN.value())
+                .error("ACCOUNT_IS_INACTIVE")
+                .message(accountIsInactiveException.getMessage())
+                .path(request.getRequestURI())
+                .build();
+
+        return new ResponseEntity<>(
+                error,
+                HttpStatus.FORBIDDEN
+        );
+    }
 }

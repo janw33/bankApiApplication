@@ -1,5 +1,6 @@
 package com.janwypych.bankApiApplication.services;
 
+import com.janwypych.bankApiApplication.Dto.ChangeStatusRequest;
 import com.janwypych.bankApiApplication.entities.AccountEntity;
 import com.janwypych.bankApiApplication.entities.TransactionEntity;
 import com.janwypych.bankApiApplication.entities.enums.AccountStatus;
@@ -7,9 +8,13 @@ import com.janwypych.bankApiApplication.entities.enums.TransactionTypeEnum;
 import com.janwypych.bankApiApplication.exception.*;
 import com.janwypych.bankApiApplication.repositories.AccountRepository;
 import com.janwypych.bankApiApplication.repositories.TransactionRepository;
+import jakarta.validation.Valid;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -47,7 +52,10 @@ public class AccountService {
             throw new AccountNotFoundException("Account not found");
         
         AccountEntity loggedAccount = foundAccount.get();
-        
+
+        if(loggedAccount.getStatus() == AccountStatus.INACTIVE)
+            throw new AccountIsInactiveException("Account is inactive");
+
         if(!passwordEncoder.matches(accountEntity.getPassword(), loggedAccount.getPassword()))
             throw new WrongPasswordException("Wrong Password");
         
@@ -141,10 +149,16 @@ public class AccountService {
         return senderAccount;
     }
 
-    public void delete(Long id) {
-        if(!accountRepository.existsById(id))
+
+    public AccountEntity changeStatus(Long id, AccountStatus status) {
+        Optional<AccountEntity> optionalFoundAccount = accountRepository.findById(id);
+
+        if(optionalFoundAccount.isEmpty())
             throw new AccountNotFoundException("Account not found");
 
-        accountRepository.deleteById(id);
+        AccountEntity foundAccount = optionalFoundAccount.get();
+        foundAccount.setStatus(status);
+        return accountRepository.save(foundAccount);
     }
 }
+

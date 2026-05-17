@@ -4,6 +4,7 @@ import com.janwypych.bankApiApplication.Dto.CreateAccountRequest;
 import com.janwypych.bankApiApplication.Dto.LoginRequest;
 import com.janwypych.bankApiApplication.TestDataUtil;
 import com.janwypych.bankApiApplication.entities.AccountEntity;
+import com.janwypych.bankApiApplication.entities.enums.AccountStatus;
 import com.janwypych.bankApiApplication.services.AccountService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,12 +24,14 @@ import tools.jackson.databind.ObjectMapper;
 @ActiveProfiles("test")
 public class LoginControllerIntegrationTests {
     private final MockMvc mockMvc;
+    private final AccountService accountService;
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public LoginControllerIntegrationTests(MockMvc mockMvc) {
+    public LoginControllerIntegrationTests(MockMvc mockMvc, AccountService accountService) {
         this.mockMvc = mockMvc;
         this.objectMapper = new ObjectMapper();
+        this.accountService = accountService;
     }
 
     @Test
@@ -119,6 +122,33 @@ public class LoginControllerIntegrationTests {
     }
 
     @Test
+    public void testThatLoginReturnsHttp403WhenAccountIsInactive() throws Exception {
+        CreateAccountRequest createAccountRequest = TestDataUtil.createCreateAccountRequest();
+        String accountJson = objectMapper.writeValueAsString(createAccountRequest);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.post("/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(accountJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isCreated()
+        );
+
+        accountService.changeStatus(1L, AccountStatus.INACTIVE);
+
+        LoginRequest loginRequest = TestDataUtil.createLoginRequest();
+        String loginJson = objectMapper.writeValueAsString(loginRequest);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.post("/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isForbidden()
+        );
+    }
+
+    @Test
     public void testThatLoginReturnsHttp401WhenGivenPasswordIsWrong() throws Exception {
         CreateAccountRequest createAccountRequest = TestDataUtil.createCreateAccountRequest();
         String accountJson = objectMapper.writeValueAsString(createAccountRequest);
@@ -195,6 +225,8 @@ public class LoginControllerIntegrationTests {
                 MockMvcResultMatchers.jsonPath("$.lastName").value(createAccountRequest.getLastName())
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.email").value(createAccountRequest.getEmail())
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.status").value(AccountStatus.ACTIVE.toString())
         );
     }
 }
