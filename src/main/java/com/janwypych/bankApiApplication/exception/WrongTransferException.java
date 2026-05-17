@@ -1,4 +1,4 @@
-package com.janwypych.bankApiApplication.exeption;
+package com.janwypych.bankApiApplication.exception;
 
 public class WrongTransferException extends RuntimeException{
     public WrongTransferException(String message) {super(message);}

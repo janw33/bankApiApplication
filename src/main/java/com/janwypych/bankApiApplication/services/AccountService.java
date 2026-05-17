@@ -3,7 +3,7 @@ package com.janwypych.bankApiApplication.services;
 import com.janwypych.bankApiApplication.entities.AccountEntity;
 import com.janwypych.bankApiApplication.entities.TransactionEntity;
 import com.janwypych.bankApiApplication.entities.enums.TransactionTypeEnum;
-import com.janwypych.bankApiApplication.exeption.*;
+import com.janwypych.bankApiApplication.exception.*;
 import com.janwypych.bankApiApplication.repositories.AccountRepository;
 import com.janwypych.bankApiApplication.repositories.TransactionRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;

@@ -1,5 +1,6 @@
 package com.janwypych.bankApiApplication.controllers;
 
+import com.janwypych.bankApiApplication.Dto.CreateAccountRequest;
 import com.janwypych.bankApiApplication.Dto.LoginRequest;
 import com.janwypych.bankApiApplication.TestDataUtil;
 import com.janwypych.bankApiApplication.entities.AccountEntity;
@@ -21,13 +22,11 @@ import tools.jackson.databind.ObjectMapper;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @ActiveProfiles("test")
 public class LoginControllerIntegrationTests {
-    private final AccountService accountService;
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public LoginControllerIntegrationTests(AccountService accountService, MockMvc mockMvc) {
-        this.accountService = accountService;
+    public LoginControllerIntegrationTests(MockMvc mockMvc) {
         this.mockMvc = mockMvc;
         this.objectMapper = new ObjectMapper();
     }
@@ -121,8 +120,16 @@ public class LoginControllerIntegrationTests {
 
     @Test
     public void testThatLoginReturnsHttp401WhenGivenPasswordIsWrong() throws Exception {
-        AccountEntity accountEntity = TestDataUtil.createAccountEntity1();
-        accountService.addAccount(accountEntity);
+        CreateAccountRequest createAccountRequest = TestDataUtil.createCreateAccountRequest();
+        String accountJson = objectMapper.writeValueAsString(createAccountRequest);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.post("/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(accountJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isCreated()
+        );
 
         LoginRequest loginRequest = TestDataUtil.createLoginRequest();
         loginRequest.setPassword("???");
@@ -139,8 +146,16 @@ public class LoginControllerIntegrationTests {
 
     @Test
     public void testThatLoginReturnsHttp200WhenAccountExistAndPasswordIsValid() throws Exception {
-        AccountEntity accountEntity = TestDataUtil.createAccountEntity1();
-        accountService.addAccount(accountEntity);
+        CreateAccountRequest createAccountRequest = TestDataUtil.createCreateAccountRequest();
+        String accountJson = objectMapper.writeValueAsString(createAccountRequest);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.post("/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(accountJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isCreated()
+        );
 
         LoginRequest loginRequest = TestDataUtil.createLoginRequest();
         String loginJson = objectMapper.writeValueAsString(loginRequest);
@@ -156,8 +171,16 @@ public class LoginControllerIntegrationTests {
 
     @Test
     public void testThatLoginReturnsAccount() throws Exception {
-        AccountEntity accountEntity = TestDataUtil.createAccountEntity1();
-        accountService.addAccount(accountEntity);
+        CreateAccountRequest createAccountRequest = TestDataUtil.createCreateAccountRequest();
+        String accountJson = objectMapper.writeValueAsString(createAccountRequest);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.post("/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(accountJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isCreated()
+        );
 
         LoginRequest loginRequest = TestDataUtil.createLoginRequest();
         String loginJson = objectMapper.writeValueAsString(loginRequest);
@@ -167,11 +190,11 @@ public class LoginControllerIntegrationTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(loginJson)
         ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.firstName").value(accountEntity.getFirstName())
+                MockMvcResultMatchers.jsonPath("$.firstName").value(createAccountRequest.getFirstName())
         ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.lastName").value(accountEntity.getLastName())
+                MockMvcResultMatchers.jsonPath("$.lastName").value(createAccountRequest.getLastName())
         ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.email").value(accountEntity.getEmail())
+                MockMvcResultMatchers.jsonPath("$.email").value(createAccountRequest.getEmail())
         );
     }
 }

@@ -1,4 +1,4 @@
-package com.janwypych.bankApiApplication.exeption;
+package com.janwypych.bankApiApplication.exception;
 
 public class WrongPasswordException extends RuntimeException{
     public WrongPasswordException(String message) { super(message);}

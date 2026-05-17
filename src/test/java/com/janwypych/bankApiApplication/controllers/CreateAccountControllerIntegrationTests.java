@@ -3,12 +3,14 @@ package com.janwypych.bankApiApplication.controllers;
 import com.janwypych.bankApiApplication.Dto.CreateAccountRequest;
 import com.janwypych.bankApiApplication.TestDataUtil;
 import com.janwypych.bankApiApplication.entities.AccountEntity;
+import com.janwypych.bankApiApplication.repositories.AccountRepository;
 import com.janwypych.bankApiApplication.services.AccountService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -17,6 +19,10 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import tools.jackson.databind.ObjectMapper;
 
 import java.math.BigDecimal;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -24,14 +30,18 @@ import java.math.BigDecimal;
 @ActiveProfiles("test")
 public class CreateAccountControllerIntegrationTests {
     private final AccountService accountService;
+    private final AccountRepository accountRepository;
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public CreateAccountControllerIntegrationTests(AccountService accountService, MockMvc mockMvc) {
+    public CreateAccountControllerIntegrationTests(AccountService accountService, MockMvc mockMvc, AccountRepository accountRepository, PasswordEncoder passwordEncoder) {
         this.accountService = accountService;
         this.mockMvc = mockMvc;
         this.objectMapper = new ObjectMapper();
+        this.accountRepository = accountRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Test
@@ -266,6 +276,30 @@ public class CreateAccountControllerIntegrationTests {
                 MockMvcResultMatchers.jsonPath("$.email").value(createAccountRequest.getEmail())
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.balance").value(BigDecimal.ZERO)
+        );
+    }
+    @Test
+    public void testThatCreateAccountStoresHashedPassword() throws Exception {
+        CreateAccountRequest createAccountRequest = TestDataUtil.createCreateAccountRequest();
+        String accountJson = objectMapper.writeValueAsString(createAccountRequest);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.post("/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(accountJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isCreated()
+        );;
+
+        Optional<AccountEntity> foundAccount = accountRepository.findByEmail(createAccountRequest.getEmail());
+        AccountEntity savedAccount = foundAccount.get();
+        assertNotEquals(createAccountRequest.getPassword(), savedAccount.getPassword());
+
+        assertTrue(
+                passwordEncoder.matches(
+                        createAccountRequest.getPassword(),
+                        savedAccount.getPassword()
+                )
         );
     }
 }

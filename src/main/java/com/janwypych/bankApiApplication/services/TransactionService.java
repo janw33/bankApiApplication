@@ -1,8 +1,7 @@
 package com.janwypych.bankApiApplication.services;
 
 import com.janwypych.bankApiApplication.entities.TransactionEntity;
-import com.janwypych.bankApiApplication.exeption.AccountNotFoundException;
-import com.janwypych.bankApiApplication.exeption.InvalidIdException;
+import com.janwypych.bankApiApplication.exception.AccountNotFoundException;
 import com.janwypych.bankApiApplication.repositories.AccountRepository;
 import com.janwypych.bankApiApplication.repositories.TransactionRepository;
 import org.springframework.data.domain.Page;
