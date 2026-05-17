@@ -70,6 +70,10 @@ public class AccountService {
             throw new AccountNotFoundException("Account not found");
 
         AccountEntity updatedAccount = foundAccount.get();
+
+        if(updatedAccount.getStatus() == AccountStatus.INACTIVE)
+            throw new AccountIsInactiveException("Account is inactive");
+
         updatedAccount.deposit(amount);
 
         transactionRepository.save(TransactionEntity
@@ -92,6 +96,9 @@ public class AccountService {
             throw new AccountNotFoundException("Account not found");
 
         AccountEntity updatedAccount = foundAccount.get();
+
+        if(updatedAccount.getStatus() == AccountStatus.INACTIVE)
+            throw new AccountIsInactiveException("Account is inactive");
 
         if(amount.compareTo(updatedAccount.getBalance()) > 0)
             throw new WrongWithdrawException("Not enough balance");
@@ -120,17 +127,23 @@ public class AccountService {
         if(optionalSenderAccount.isEmpty())
             throw new AccountNotFoundException("Sender account not found");
 
+        AccountEntity senderAccount = optionalSenderAccount.get();
+
+        if(senderAccount.getStatus() == AccountStatus.INACTIVE)
+            throw new AccountIsInactiveException("Sender Account is inactive");
+
         Optional<AccountEntity> optionalReceiverAccount = accountRepository.findById(receiverId);
 
         if(optionalReceiverAccount.isEmpty())
             throw new AccountNotFoundException("Receiver account not found");
 
-        AccountEntity senderAccount = optionalSenderAccount.get();
+        AccountEntity receiverAccount = optionalReceiverAccount.get();
+
+        if(receiverAccount.getStatus() == AccountStatus.INACTIVE)
+            throw new AccountIsInactiveException("Receiver Account is inactive");
 
         if(amount.compareTo(senderAccount.getBalance()) > 0)
             throw new WrongTransferException("Not enough balance");
-
-        AccountEntity receiverAccount = optionalReceiverAccount.get();
 
         senderAccount.withdraw(amount);
         receiverAccount.deposit(amount);

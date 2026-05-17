@@ -3,6 +3,7 @@ package com.janwypych.bankApiApplication.controllers;
 import com.janwypych.bankApiApplication.Dto.*;
 import com.janwypych.bankApiApplication.TestDataUtil;
 import com.janwypych.bankApiApplication.entities.AccountEntity;
+import com.janwypych.bankApiApplication.entities.enums.AccountStatus;
 import com.janwypych.bankApiApplication.services.AccountService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,6 +86,23 @@ public class WithdrawControllerIntegrationTests {
                         .content(withdrawJson)
         ).andExpect(
                 MockMvcResultMatchers.status().isNotFound()
+        );
+    }
+
+    @Test
+    public void testThatWithdrawReturnsHttp403WhenAccountIsInactive() throws Exception {
+        AccountEntity accountEntity = TestDataUtil.createAccountEntity1();
+        accountService.addAccount(accountEntity);
+        accountService.changeStatus(accountEntity.getId(), AccountStatus.INACTIVE);
+
+        WithdrawRequest withdrawRequest = TestDataUtil.createWithdrawRequest();
+        String withdrawJson = objectMapper.writeValueAsString(withdrawRequest);
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch("/withdraw/" + accountEntity.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(withdrawJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isForbidden()
         );
     }
 

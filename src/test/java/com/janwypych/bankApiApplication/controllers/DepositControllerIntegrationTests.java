@@ -3,6 +3,7 @@ package com.janwypych.bankApiApplication.controllers;
 import com.janwypych.bankApiApplication.Dto.*;
 import com.janwypych.bankApiApplication.TestDataUtil;
 import com.janwypych.bankApiApplication.entities.AccountEntity;
+import com.janwypych.bankApiApplication.entities.enums.AccountStatus;
 import com.janwypych.bankApiApplication.services.AccountService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,6 +88,24 @@ public class DepositControllerIntegrationTests {
                         .content(depositJson)
         ).andExpect(
                 MockMvcResultMatchers.status().isNotFound()
+        );
+    }
+
+    @Test
+    public void testThatDepositReturnsHttp403WhenAccountIsInactive() throws Exception {
+        AccountEntity accountEntity = TestDataUtil.createAccountEntity1();
+        accountService.addAccount(accountEntity);
+        accountService.changeStatus(accountEntity.getId(), AccountStatus.INACTIVE);
+
+        DepositRequest depositRequest = TestDataUtil.createDepositRequest();
+        String depositJson = objectMapper.writeValueAsString(depositRequest);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch("/deposit/" + accountEntity.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(depositJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isForbidden()
         );
     }
 

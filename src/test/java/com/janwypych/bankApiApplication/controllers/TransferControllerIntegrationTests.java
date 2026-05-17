@@ -3,6 +3,7 @@ package com.janwypych.bankApiApplication.controllers;
 import com.janwypych.bankApiApplication.Dto.*;
 import com.janwypych.bankApiApplication.TestDataUtil;
 import com.janwypych.bankApiApplication.entities.AccountEntity;
+import com.janwypych.bankApiApplication.entities.enums.AccountStatus;
 import com.janwypych.bankApiApplication.services.AccountService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -119,6 +120,24 @@ public class TransferControllerIntegrationTests {
         );
     }
     @Test
+    public void testThatTransferReturnsHttp403WhenSenderAccountIsInactive() throws Exception {
+        AccountEntity senderAccount = TestDataUtil.createAccountEntity1();
+        accountService.addAccount(senderAccount);
+        accountService.changeStatus(senderAccount.getId(), AccountStatus.INACTIVE);
+
+        TransferRequest transferRequest = TestDataUtil.createTransferRequest();
+        String transferJson = objectMapper.writeValueAsString(transferRequest);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch("/transfer")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(transferJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isForbidden()
+        );
+    }
+
+    @Test
     public void testThatTransferReturnsHttp404WhenReceiverAccountDoesntExist() throws Exception {
         AccountEntity senderAccount = TestDataUtil.createAccountEntity1();
         accountService.addAccount(senderAccount);
@@ -134,6 +153,28 @@ public class TransferControllerIntegrationTests {
                 MockMvcResultMatchers.status().isNotFound()
         );
     }
+
+    @Test
+    public void testThatTransferReturnsHttp403WhenReceiverAccountIsInactive() throws Exception {
+        AccountEntity senderAccount = TestDataUtil.createAccountEntity1();
+        accountService.addAccount(senderAccount);
+
+        AccountEntity receiverAccount = TestDataUtil.createAccountEntity2();
+        accountService.addAccount(receiverAccount);
+        accountService.changeStatus(receiverAccount.getId(), AccountStatus.INACTIVE);
+
+        TransferRequest transferRequest = TestDataUtil.createTransferRequest();
+        String transferJson = objectMapper.writeValueAsString(transferRequest);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch("/transfer")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(transferJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isForbidden()
+        );
+    }
+
     @Test
     public void testThatTransferReturnsHttp400WhenAmountIsGreaterThanSenderBalance() throws Exception {
         AccountEntity senderAccount = TestDataUtil.createAccountEntity1();
