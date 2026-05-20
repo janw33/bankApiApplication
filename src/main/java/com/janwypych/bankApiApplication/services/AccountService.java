@@ -1,6 +1,7 @@
 package com.janwypych.bankApiApplication.services;
 
 import com.janwypych.bankApiApplication.Dto.ChangeStatusRequest;
+import com.janwypych.bankApiApplication.Dto.TransactionDto;
 import com.janwypych.bankApiApplication.entities.AccountEntity;
 import com.janwypych.bankApiApplication.entities.TransactionEntity;
 import com.janwypych.bankApiApplication.entities.enums.AccountStatus;
@@ -63,7 +64,7 @@ public class AccountService {
     }
 
     @Transactional
-    public AccountEntity deposit(Long id, BigDecimal amount) {
+    public TransactionEntity deposit(Long id, BigDecimal amount) {
         Optional<AccountEntity> foundAccount = accountRepository.findById(id);
 
         if(foundAccount.isEmpty())
@@ -76,7 +77,7 @@ public class AccountService {
 
         updatedAccount.deposit(amount);
 
-        transactionRepository.save(TransactionEntity
+        return transactionRepository.save(TransactionEntity
                 .builder()
                 .amount(amount)
                 .type(TransactionTypeEnum.DEPOSIT)
@@ -84,8 +85,6 @@ public class AccountService {
                 .senderAccount(updatedAccount)
                 .receiverAccount(null)
                 .build());
-
-        return accountRepository.save(updatedAccount);
     }
 
     @Transactional

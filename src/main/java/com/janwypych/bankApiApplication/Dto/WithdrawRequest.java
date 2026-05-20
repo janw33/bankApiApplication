@@ -16,5 +16,5 @@ import java.math.BigDecimal;
 public class WithdrawRequest {
     @NotNull
     @Positive
-    BigDecimal amount;
+    private BigDecimal amount;
 }

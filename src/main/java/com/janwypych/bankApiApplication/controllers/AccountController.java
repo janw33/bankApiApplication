@@ -2,7 +2,10 @@ package com.janwypych.bankApiApplication.controllers;
 
 import com.janwypych.bankApiApplication.Dto.*;
 import com.janwypych.bankApiApplication.entities.AccountEntity;
+import com.janwypych.bankApiApplication.entities.TransactionEntity;
+import com.janwypych.bankApiApplication.exception.InvalidTokenException;
 import com.janwypych.bankApiApplication.mappers.AccountMapper;
+import com.janwypych.bankApiApplication.mappers.TransactionMapper;
 import com.janwypych.bankApiApplication.services.AccountService;
 import com.janwypych.bankApiApplication.services.JwtService;
 import io.jsonwebtoken.Jwts;
@@ -17,10 +20,12 @@ public class AccountController {
     private final AccountService accountService;
     private final AccountMapper accountMapper;
     private final JwtService jwtService;
+    private final TransactionMapper transactionMapper;
 
-    public AccountController(AccountService accountService, AccountMapper accountMapper, JwtService jwtService) {
+    public AccountController(AccountService accountService, AccountMapper accountMapper, JwtService jwtService, TransactionMapper transactionMapper) {
         this.accountService = accountService;
         this.accountMapper = accountMapper;
+        this.transactionMapper = transactionMapper;
         this.jwtService = jwtService;
     }
 
@@ -48,12 +53,22 @@ public class AccountController {
         return new ResponseEntity<>(new AuthResponse(token), HttpStatus.OK);
     }
 
-    @PatchMapping(path = "/deposit/{id}")
-    public ResponseEntity<AccountResponse> deposit(
-            @PathVariable("id") Long id,
-            @Valid @RequestBody DepositRequest depositRequest) {
-        AccountEntity accountEntity = accountService.deposit(id, depositRequest.getAmount());
-        return new ResponseEntity<>(accountMapper.mapToAccountResponse(accountEntity), HttpStatus.OK);
+    @PatchMapping("/deposit")
+    public ResponseEntity<TransactionDto> deposit(
+            @RequestHeader("Authorization") String authHeader,
+            @Valid @RequestBody DepositRequest depositRequest
+    ) {
+        if (!authHeader.startsWith("Bearer ")) {
+            throw new InvalidTokenException("Invalid authorization header");
+        }
+
+        String token = authHeader.substring(7);
+
+        Long id = Long.parseLong(jwtService.extractUserId(token));
+
+        TransactionEntity transactionEntity = accountService.deposit(id, depositRequest.getAmount());
+
+        return new ResponseEntity<>(transactionMapper.mapToTransactionDto(transactionEntity), HttpStatus.OK);
     }
     @PatchMapping(path = "/withdraw/{id}")
     public ResponseEntity<AccountResponse> withdraw(
