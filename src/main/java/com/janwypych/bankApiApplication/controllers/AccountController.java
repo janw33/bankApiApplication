@@ -4,6 +4,8 @@ import com.janwypych.bankApiApplication.Dto.*;
 import com.janwypych.bankApiApplication.entities.AccountEntity;
 import com.janwypych.bankApiApplication.mappers.AccountMapper;
 import com.janwypych.bankApiApplication.services.AccountService;
+import com.janwypych.bankApiApplication.services.JwtService;
+import io.jsonwebtoken.Jwts;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,26 +16,36 @@ public class AccountController {
 
     private final AccountService accountService;
     private final AccountMapper accountMapper;
+    private final JwtService jwtService;
 
-    public AccountController(AccountService accountService, AccountMapper accountMapper) {
+    public AccountController(AccountService accountService, AccountMapper accountMapper, JwtService jwtService) {
         this.accountService = accountService;
         this.accountMapper = accountMapper;
+        this.jwtService = jwtService;
     }
 
     @PostMapping(path = "/register")
-    public ResponseEntity<AccountResponse> createAccount(
+    public ResponseEntity<AuthResponse> createAccount(
             @Valid @RequestBody CreateAccountRequest createAccountRequest) {
+
         AccountEntity account = accountMapper.mapFromCreateAccountRequest(createAccountRequest);
         AccountEntity addedAccount = accountService.addAccount(account);
-        return new ResponseEntity<>(accountMapper.mapToAccountResponse(addedAccount), HttpStatus.CREATED);
+
+        String token = jwtService.generateToken(addedAccount.getId());
+
+        return new ResponseEntity<>(new AuthResponse(token), HttpStatus.CREATED);
     }
 
     @PostMapping(path = "/login")
-    public ResponseEntity<AccountResponse> login(
+    public ResponseEntity<AuthResponse> login(
             @Valid @RequestBody LoginRequest loginRequest) {
+
         AccountEntity accountEntity = accountMapper.mapFromLoginAccount(loginRequest);
         AccountEntity loggedAccount = accountService.login(accountEntity);
-        return new ResponseEntity<>(accountMapper.mapToAccountResponse(loggedAccount), HttpStatus.OK);
+
+        String token = jwtService.generateToken(loggedAccount.getId());
+
+        return new ResponseEntity<>(new AuthResponse(token), HttpStatus.OK);
     }
 
     @PatchMapping(path = "/deposit/{id}")

@@ -220,13 +220,9 @@ public class LoginControllerIntegrationTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(loginJson)
         ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.firstName").value(createAccountRequest.getFirstName())
+                MockMvcResultMatchers.jsonPath("$.token").isNotEmpty()
         ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.lastName").value(createAccountRequest.getLastName())
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.email").value(createAccountRequest.getEmail())
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.status").value(AccountStatus.ACTIVE.toString())
+                MockMvcResultMatchers.jsonPath("$.token").isString()
         );
     }
 }

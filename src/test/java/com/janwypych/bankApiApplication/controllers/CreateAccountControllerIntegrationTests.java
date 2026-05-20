@@ -261,7 +261,7 @@ public class CreateAccountControllerIntegrationTests {
     }
 
     @Test
-    public void testThatCreateAccountReturnsAccount() throws Exception {
+    public void testThatCreateAccountReturnsToken() throws Exception {
         CreateAccountRequest createAccountRequest = TestDataUtil.createCreateAccountRequest();
         String accountJson = objectMapper.writeValueAsString(createAccountRequest);
 
@@ -270,15 +270,9 @@ public class CreateAccountControllerIntegrationTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(accountJson)
         ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.firstName").value(createAccountRequest.getFirstName())
+                MockMvcResultMatchers.jsonPath("$.token").isNotEmpty()
         ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.lastName").value(createAccountRequest.getLastName())
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.email").value(createAccountRequest.getEmail())
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.balance").value(BigDecimal.ZERO)
-        ).andExpect(
-                MockMvcResultMatchers.jsonPath("$.status").value(AccountStatus.ACTIVE.toString())
+                MockMvcResultMatchers.jsonPath("$.token").isString()
         );
     }
     @Test
